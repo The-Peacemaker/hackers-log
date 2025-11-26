@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
+
+/* --- THEME DEFINITIONS --- */
+:root {
+  --bg: #282a36;
+  --curr-line: #44475a;
+  --fg: #f8f8f2;
+  --comment: #6272a4;
+  --cyan: #8be9fd;
+  --green: #50fa7b;
+  --orange: #ffb86c;
+  --pink: #ff79c6;
+  --purple: #bd93f9;
+  --red: #ff5555;
+  --yellow: #f1fa8c;
+}
+
+[data-theme="hacker"] {
+  --bg: #050505;
+  --curr-line: #111;
+  --fg: #00ff41;
+  --comment: #008f11;
+  --cyan: #00ff41;
+  --green: #00ff41;
+  --orange: #00ff41;
+  --pink: #ccffcc;
+  --purple: #00ff41;
+  --red: #ff3333;
+  --yellow: #00ff41;
+  text-shadow: 0 0 3px rgba(0, 255, 65, 0.5);
+}
+
+[data-theme="hacker"] .file-preview {
+  background-color: rgba(0, 255, 65, 0.02);
+  border-left: 1px solid #003300;
+}
+
+[data-theme="hacker"] .top-bar {
+  border-bottom: 1px solid #003300;
+}
+
+[data-theme="gruvbox"] {
+  --bg: #282828;
+  --curr-line: #3c3836;
+  --fg: #ebdbb2;
+  --comment: #928374;
+  --cyan: #8ec07c;
+  --green: #b8bb26;
+  --orange: #fe8019;
+  --pink: #d3869b;
+  --purple: #d3869b;
+  --red: #fb4934;
+  --yellow: #fabd2f;
+  text-shadow: none;
+}
+
+/* GitHub Dark (Dimmed) */
+[data-theme="github"] {
+  --bg: #0d1117;
+  --curr-line: #161b22;
+  --fg: #c9d1d9;
+  --comment: #8b949e;
+  --cyan: #a5d6ff;
+  --green: #7ee787;
+  --orange: #ffa657;
+  --pink: #d2a8ff;
+  --purple: #d2a8ff;
+  --red: #ff7b72;
+  --yellow: #f2cc60;
+  text-shadow: none;
+}
+
+body {
+  background-color: #050505;
+  color: var(--fg);
+  font-family: 'JetBrains Mono', monospace;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  background-image: radial-gradient(#222 1px, transparent 1px);
+  background-size: 24px 24px;
+  transition: background 0.5s;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--curr-line);
+  border: 3px solid var(--bg);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--comment);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Glitch Animation */
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.glitch-active {
+  animation: glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+  color: var(--green);
+}
+
+/* Preview Pane Typography - Scoped to avoid conflicts but ensure application */
+.file-preview h1 {
+  color: var(--pink);
+  font-size: 22px;
+  margin-bottom: 10px;
+  font-weight: 800;
+  border-bottom: 2px dashed var(--curr-line);
+  padding-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.file-preview h2 {
+  color: var(--purple);
+  font-size: 16px;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.file-preview p {
+  color: var(--fg);
+  margin-bottom: 15px;
+  max-width: 800px;
+  opacity: 0.9;
+}
+
+.file-preview .highlight {
+  color: var(--green);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.file-preview .code-block {
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--orange);
+  padding: 15px;
+  margin: 15px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--cyan);
+  display: block;
+  white-space: pre-wrap;
+}
+
+.file-preview .tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--comment);
+  color: var(--comment);
+  margin-right: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.file-preview code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--orange);
+}
