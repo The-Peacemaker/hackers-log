@@ -48,27 +48,58 @@ hack [target]: Initiate hack sequence
     type: 'file',
     content: `
       <h1>THE $50,000 GHOST RCE</h1>
-      <span class="tag">BUG_BOUNTY</span> <span class="tag">CRITICAL</span>
+      <span class="tag">BUG_BOUNTY</span> <span class="tag">CRITICAL</span> <span class="tag">STORYTIME</span>
       
       <p>Target: <code>[REDACTED]</code><br>
-      Vulnerability: HTTP Request Smuggling (CL.TE)</p>
+      Vulnerability: HTTP Request Smuggling (CL.TE) -> Admin Account Takeover</p>
       
-      <h2>THE DISCOVERY</h2>
-      <p>I found a discrepancy in how the front-end Akamai WAF and the back-end Tomcat server handled the <code>Transfer-Encoding</code> header. By sending a malformed header, I could desynchronize the socket.</p>
+      <h2>// THE RECON</h2>
+      <p>It started like any other Tuesday night. I was fuzzing the subdomains of a major fintech giant. Most endpoints were locked down tight—WAFs, rate limits, the works. But then I found <code>api-legacy.[REDACTED].com</code>.</p>
+      
+      <p>It was running an ancient version of Tomcat behind an Akamai edge server. My scanner didn't flag it, but my gut did. The <code>Server</code> header was leaking version info. Rookie mistake.</p>
+
+      <h2>// THE ANOMALY</h2>
+      <p>I started playing with the <code>Transfer-Encoding</code> headers. I sent a request that was ambiguous—valid to the front-end, but malformed to the back-end.</p>
 
       <div class="code-block">
 POST / HTTP/1.1
-Host: vulnerable.com
+Host: api-legacy.target.com
 Content-Length: 13
 Transfer-Encoding: chunked
 
 0
 
-SMUGGLED GET /admin HTTP/1.1
+SMUGGLED GET /admin/users HTTP/1.1
+X-Ignore: X
       </div>
 
-      <h2>THE IMPACT</h2>
-      <p>The smuggled request bypassed all ACLs. I achieved a full account takeover of the admin panel.</p>
+      <p>The response was weird. It hung for 5 seconds and then returned a 500 error. But the <em>next</em> request I sent—a completely normal GET request—returned a 403 Forbidden... for a path I didn't request.</p>
+      
+      <p><span class="highlight">EUREKA MOMENT:</span> The back-end had processed my "smuggled" GET request as the start of the <em>next</em> request on the socket. I had desynchronized the connection.</p>
+
+      <h2>// THE EXPLOIT</h2>
+      <p>I crafted a payload to poison the socket queue. I smuggled a request to <code>/admin/create_user</code> with my own credentials. I fired it off and waited.</p>
+      
+      <p>Nothing happened. I refreshed. Nothing.</p>
+      
+      <p>Then, 30 seconds later, I tried to login with <code>user: h4x0r</code> and <code>pass: pwn3d</code>.</p>
+      
+      <div class="code-block">
+HTTP/1.1 200 OK
+Set-Cookie: ADMIN_SESSION=...
+Welcome, Administrator.
+      </div>
+
+      <p>I was in. Full admin access. I could see everything—user data, transaction logs, API keys. I immediately stopped, documented the steps, and wrote the report.</p>
+
+      <h2>// THE PAYOUT</h2>
+      <p>Reported: Nov 12th<br>
+      Triaged: Nov 12th (15 mins later)<br>
+      Bounty Awarded: Nov 14th</p>
+      
+      <p><strong>Bounty: $50,000 + $5,000 Bonus for a well-written report.</strong></p>
+      
+      <p>Sometimes, the ghosts in the machine are just waiting for someone to speak their language.</p>
     `
   },
   {
