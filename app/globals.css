@@ -372,6 +372,64 @@
   margin: 2rem 0;
 }
 
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  margin: 1.5rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.prose thead {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.prose th {
+  text-align: left;
+  padding: 0.6rem 0.7rem;
+  font-weight: 600;
+  color: var(--secondary);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.prose td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--secondary);
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
+}
+
+.prose tbody tr:hover td {
+  background: var(--surface);
+}
+
+.prose tbody tr:nth-child(even) td {
+  background: rgba(128, 128, 128, 0.03);
+}
+
+.prose tbody tr:nth-child(even):hover td {
+  background: var(--surface);
+}
+
+.prose table code {
+  font-size: 0.7rem;
+  background: none;
+  padding: 0;
+  border: none;
+}
+
 /* Callout Box */
 .callout {
   padding: 1rem 1.25rem;
