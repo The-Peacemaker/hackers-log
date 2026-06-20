@@ -1,23 +1,23 @@
 [
   {
-    "id": "visaprediction",
-    "title": "Visa Status Prediction",
-    "description": "A full-stack ML system predicting visa processing times from 12 applicant attributes — Random Forest (R² 0.87) served through a React SPA on Netlify with a Flask inference API on Vercel.",
+    "id": "algotrade",
+    "title": "QuantFlow",
+    "description": "An institutional-grade algorithmic trading system for Indian equity markets with 15+ technical indicators, multi-timeframe confluence, Kelly Criterion risk management, and Angel One SmartAPI integration.",
     "date": "July 2026",
     "category": "Open Source",
-    "tags": ["Python", "Machine Learning", "React", "Flask"],
+    "tags": ["Python", "Quantitative Finance", "NSE", "Machine Learning"],
     "link": "/blog/greendrive",
-    "github": "https://github.com/The-Peacemaker/VISA-STATUS-PREDICTION"
+    "github": "https://github.com/The-Peacemaker/Algo-Trade"
   },
   {
-    "id": "ghostscanner",
-    "title": "GhostScanner",
-    "description": "A concurrent Go-based scanner designed to identify and safely exploit complex HTTP Request Smuggling (CL.TE and TE.CL) vulnerabilities on edge proxy networks.",
-    "date": "June 2026",
+    "id": "bazel-credential-bleed",
+    "title": "Bazel ProxyHelper Credential Bleed",
+    "description": "A JVM-global Authenticator in Bazel's ProxyHelper leaks proxy credentials across proxy boundaries — CWE-522 finding reported to Google OSS VRP.",
+    "date": "April 2026",
     "category": "Security",
-    "tags": ["Go", "Web Security", "Network Programming"],
+    "tags": ["Google VRP", "Bazel", "Credential Leak", "Java"],
     "link": "/blog/ghost-rce",
-    "github": "https://github.com/benedii/ghostscanner"
+    "github": "https://github.com/bazelbuild/bazel"
   },
   {
     "id": "sandbox",
