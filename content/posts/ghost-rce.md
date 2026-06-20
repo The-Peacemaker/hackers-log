@@ -220,6 +220,59 @@ The two-month arc from initial submission to final triage is a case study in the
 
 The vulnerability was re-triaged three hours and forty-eight minutes after the rebuttal was submitted.
 
+## The Patch: Pull Request #29736
+
+Following the triage confirmation, I submitted a patched implementation to the Bazel project as [Pull Request #29736](https://github.com/bazelbuild/bazel/pull/29736). The fix replaces the single-shot `finalUsername`/`finalPassword` closure with a `ConcurrentHashMap<String, PasswordAuthentication>` keyed by `host:port`:
+
+```java
+// Before: One anonymous Authenticator subclass closes over the first
+// username/password and returns them for EVERY RequestorType.PROXY challenge.
+
+if (getRequestorType() == RequestorType.PROXY) {
+    return new PasswordAuthentication(              // ← LEAK: same creds
+        internalToUnicode(finalUsername),            //     for ANY proxy
+        internalToUnicode(finalPassword).toCharArray());
+}
+
+// After: Credentials stored per proxy endpoint, looked up by requesting host+port.
+
+private static final ConcurrentHashMap<String, PasswordAuthentication>
+    proxyCredentials = new ConcurrentHashMap<>();
+
+// Registration:
+String proxyKey = hostname + ":" + port;
+proxyCredentials.put(proxyKey, new PasswordAuthentication(
+    internalToUnicode(username),
+    internalToUnicode(password).toCharArray()));
+
+// Lookup at auth time:
+public PasswordAuthentication getPasswordAuthentication() {
+    if (getRequestorType() == RequestorType.PROXY) {
+        String key = getRequestingHost() + ":" + getRequestingPort();
+        PasswordAuthentication creds = proxyCredentials.get(key);
+        if (creds != null) return creds;
+        // Unknown proxy: return null (safe failure, no leak)
+        return null;
+    }
+    // Delegate to pre-existing authenticator for non-proxy auth
+    ...
+}
+```
+
+The patch brings several architectural improvements:
+
+| Property | Before | After |
+|---|---|---|
+| N proxies with N different creds | Only first caller wins | Each endpoint gets its own creds |
+| Unknown proxy request | Gets first caller's creds **(leak)** | Gets `null` **(safe failure)** |
+| Thread safety | Double-checked locking on volatile | `ConcurrentHashMap` + synchronized |
+| Testability | `resetAuthenticatorForTesting()` | Also clears the credential map |
+| Backward compatibility | Full | Full — only expands scope |
+
+The PR passed all 38 CI checks, including a dedicated test suite verifying exact host:port matching, host mismatch rejection, port mismatch rejection, multiple independent proxy credentials, and requestor-type filtering. The patch was submitted under Google's Patch Rewards Program, following the responsible disclosure path through OSS VRP (tracker ID: 502632524).
+
+This fix addresses a credential leak vulnerability (CWE-522) in Bazel, closing the credential bleed across proxy boundaries in long-lived Bazel server processes — `+35 additions, −8 deletions` across a single file.
+
 ---
 
 ## What This Means for Build Systems
