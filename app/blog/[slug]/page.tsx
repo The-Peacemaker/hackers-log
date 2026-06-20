@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const allPosts = await getAllPosts();
-  const excludedSlugs = slug === 'silent-invigilator' ? ['greendrive'] : [];
+  const excludedSlugs = slug === 'silent-invigilator' ? ['quantflow'] : [];
   const relatedPosts = allPosts
     .filter(p => p.slug !== slug && !excludedSlugs.includes(p.slug) && p.categories.some(c => post.categories.includes(c)))
     .slice(0, 2);

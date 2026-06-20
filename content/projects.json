@@ -6,7 +6,7 @@
     "date": "July 2026",
     "category": "Open Source",
     "tags": ["Python", "Quantitative Finance", "NSE", "Machine Learning"],
-    "link": "/blog/greendrive",
+    "link": "/blog/quantflow",
     "github": "https://github.com/The-Peacemaker/Algo-Trade"
   },
   {
@@ -16,7 +16,7 @@
     "date": "April 2026",
     "category": "Security",
     "tags": ["Google VRP", "Bazel", "Credential Leak", "Java"],
-    "link": "/blog/ghost-rce",
+    "link": "/blog/bazel-credential-bleed",
     "github": "https://github.com/bazelbuild/bazel"
   },
   {
