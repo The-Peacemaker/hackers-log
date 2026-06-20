@@ -1,24 +1,16 @@
-'use client';
+import Dashboard from '@/components/Dashboard';
+import { getAllPosts, getAllLogs } from '@/lib/markdown';
 
-import { useState, useEffect } from 'react';
-import TerminalWindow from '@/components/TerminalWindow';
-import MatrixRain from '@/components/MatrixRain';
-import BootSequence from '@/components/BootSequence';
+export const revalidate = 3600;
 
-export default function Home() {
-  const [matrixActive, setMatrixActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export default async function Home() {
+  const posts = await getAllPosts();
+  const logs = await getAllLogs();
+  const categories = ['All', ...Array.from(new Set(posts.flatMap(p => p.categories)))];
 
   return (
-    <main className="flex items-center justify-center h-screen">
-      {isLoading ? (
-        <BootSequence onComplete={() => setIsLoading(false)} />
-      ) : (
-        <>
-          {matrixActive && <MatrixRain />}
-          <TerminalWindow onMatrixToggle={setMatrixActive} matrixActive={matrixActive} />
-        </>
-      )}
+    <main className="w-full px-6 md:px-10 lg:px-16 xl:px-24">
+      <Dashboard posts={posts} logs={logs} categories={categories} />
     </main>
   );
 }

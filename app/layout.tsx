@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
+import { Instrument_Serif, Inter, JetBrains_Mono } from 'next/font/google';
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import ClickSpark from "@/components/ClickSpark";
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-serif',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: "root@benedict:~",
-  description: "Benedii's Hacker Blog & Portfolio",
+  title: "Benedict's Notebook",
+  description: "Writings on code architecture, vulnerability research, open source, and systems design.",
 };
 
 export default function RootLayout({
@@ -14,22 +32,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html 
+      lang="en" 
+      className={`${instrumentSerif.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+    >
       <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark') document.documentElement.classList.add('dark');
+          })();
+        `}} />
       </head>
-      <body className="font-mono">
-        <ThemeProvider>
-          <ClickSpark
-            sparkColor='#00ff41'
-            sparkSize={10}
-            sparkRadius={20}
-            sparkCount={8}
-            duration={400}
-          >
-            {children}
-          </ClickSpark>
-        </ThemeProvider>
+      <body className="min-h-screen flex flex-col">
+        {children}
       </body>
     </html>
   );

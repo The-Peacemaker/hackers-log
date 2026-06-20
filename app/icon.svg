@@ -1,4 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#050505" rx="12" />
-  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#00ff41" font-family="monospace" font-weight="bold" font-size="36" style="text-shadow: 0 0 8px rgba(0, 255, 65, 0.8);">&gt;_</text>
+  <rect width="64" height="64" fill="#fafaf8" rx="14" />
+  <!-- Book spine -->
+  <rect x="30" y="10" width="4" height="44" rx="1" fill="#1a1a2e" />
+  <!-- Left page -->
+  <path d="M12 12H30V54H14C12.9 54 12 53.1 12 52V12Z" fill="#ffffff" stroke="#d4d4d4" stroke-width="1.5" />
+  <!-- Right page -->
+  <path d="M34 12H52V54H34V12Z" fill="#ffffff" stroke="#d4d4d4" stroke-width="1.5" />
+  <!-- Left page lines -->
+  <line x1="17" y1="22" x2="27" y2="22" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="17" y1="28" x2="27" y2="28" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="17" y1="34" x2="27" y2="34" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="17" y1="40" x2="27" y2="40" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Right page lines -->
+  <line x1="37" y1="22" x2="47" y2="22" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="37" y1="28" x2="47" y2="28" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="37" y1="34" x2="44" y2="34" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Page curl bottom-right -->
+  <path d="M52 44V54H42L52 44Z" fill="#e8e8e6" stroke="#d4d4d4" stroke-width="1" />
 </svg>
