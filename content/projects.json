@@ -1,13 +1,13 @@
 [
   {
-    "id": "greendrive",
-    "title": "GreenDrive",
-    "description": "An eco-friendly routing engine that computes fuel-optimal driving paths using real-time elevation changes, stoplight frequencies, and edge regression models.",
+    "id": "algotrade",
+    "title": "QuantFlow",
+    "description": "An institutional-grade algorithmic trading system for Indian equity markets with 15+ technical indicators, multi-timeframe confluence, Kelly Criterion risk management, and Angel One SmartAPI integration.",
     "date": "July 2026",
     "category": "Open Source",
-    "tags": ["AI", "TypeScript", "GeoJSON"],
+    "tags": ["Python", "Quantitative Finance", "NSE", "Machine Learning"],
     "link": "/blog/greendrive",
-    "github": "https://github.com/benedii/greendrive"
+    "github": "https://github.com/The-Peacemaker/Algo-Trade"
   },
   {
     "id": "ghostscanner",
