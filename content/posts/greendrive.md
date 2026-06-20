@@ -11,6 +11,8 @@ The Indian equity markets execute over 80,000 crores in daily turnover across th
 
 I spent three months finding out. The result is **QuantFlow** — an institutional-grade algorithmic trading framework purpose-built for the National Stock Exchange of India.
 
+> **Source code**: [github.com/The-Peacemaker/Algo-Trade](https://github.com/The-Peacemaker/Algo-Trade) — Python, MIT license. Contributions, forks, and paper-trading audits welcome.
+
 ---
 
 ## Architecture: The Pipeline
