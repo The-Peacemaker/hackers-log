@@ -1,0 +1,40 @@
+[
+  {
+    "id": "greendrive",
+    "title": "GreenDrive",
+    "description": "An eco-friendly routing engine that computes fuel-optimal driving paths using real-time elevation changes, stoplight frequencies, and edge regression models.",
+    "date": "July 2026",
+    "category": "Open Source",
+    "tags": ["AI", "TypeScript", "GeoJSON"],
+    "link": "/blog/greendrive",
+    "github": "https://github.com/benedii/greendrive"
+  },
+  {
+    "id": "ghostscanner",
+    "title": "GhostScanner",
+    "description": "A concurrent Go-based scanner designed to identify and safely exploit complex HTTP Request Smuggling (CL.TE and TE.CL) vulnerabilities on edge proxy networks.",
+    "date": "June 2026",
+    "category": "Security",
+    "tags": ["Go", "Web Security", "Network Programming"],
+    "link": "/blog/ghost-rce",
+    "github": "https://github.com/benedii/ghostscanner"
+  },
+  {
+    "id": "sandbox",
+    "title": "Linux Kernel Process Sandbox",
+    "description": "A custom kernel-level security module implementing lightweight sandboxing, syscall auditing, and chroot-like filesystem isolation.",
+    "date": "May 2026",
+    "category": "Computer Science",
+    "tags": ["C", "Linux Kernel", "Security"],
+    "github": "https://github.com/benedii/kernel-sandbox"
+  },
+  {
+    "id": "minicpu",
+    "title": "MiniCPU & Assembler",
+    "description": "A complete 16-bit virtual CPU simulator with registers, custom instruction set architecture (ISA), assembler compiler, and memory-mapped graphics screen.",
+    "date": "April 2026",
+    "category": "Computer Science",
+    "tags": ["TypeScript", "Hardware Simulation", "Compiler"],
+    "github": "https://github.com/benedii/minicpu"
+  }
+]
