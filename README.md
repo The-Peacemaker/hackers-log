@@ -1,155 +1,117 @@
-# 🖥️ Benedii's Hacker Blog - Terminal UI
+# BENEDICT'S NOTEBOOK
 
-A hacker-themed blog/portfolio built with **Next.js 14**, **TypeScript**, and **Tailwind CSS**. Features a retro terminal interface with multiple themes, Matrix rain effects, and interactive command-line interface.
-
-## ✨ Features
-
-- 🎨 **4 Themes**: GitHub (default), Dracula, Gruvbox, and Hacker
-- ⌨️ **Interactive CLI**: Command bar with built-in commands
-- 🔑 **Arrow Key Navigation**: Navigate blog posts like a file manager
-- 💻 **Terminal UI**: Complete TUI experience with file list and preview pane
-- 🎬 **Matrix Rain Effect**: Toggleable Matrix-style falling code animation
-- ⚡ **Fast & Modern**: Built on Next.js 14 with SSR and optimal performance
-- 📱 **Responsive Design**: Works on all screen sizes
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ installed
-- npm, yarn, or pnpm package manager
-
-### Installation
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   ```
-
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   ```
-
-3. **Open your browser:**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🎮 Commands
-
-Type these commands in the command bar at the bottom:
-
-- `help` - Show available commands
-- `theme [name]` - Switch themes (dracula, gruvbox, hacker, github)
-- `matrix` - Toggle Matrix rain effect
-- `music` - Toggle background music loop
-- `go dark` - Activate the hidden hacker protocol (Glitch + Matrix + Hacker theme)
-- `whoami` - Display current user
-- `hack [target]` - Simulate a hack sequence (just for fun!)
-- `sudo` - Try it and see 😉
-
-## ⌨️ Keyboard Shortcuts
-
-- **Arrow Up/Down** - Navigate through blog posts
-- **Enter** (when not in command bar) - Focus command input
-- **Click anywhere** - Focus command input
-
-## 📁 Project Structure
-
-```
-├── app/
-│   ├── globals.css          # Global styles and theme variables
-│   ├── layout.tsx           # Root layout with ThemeProvider
-│   └── page.tsx             # Main page component
-├── components/
-│   ├── CommandBar.tsx       # Interactive command-line interface
-│   ├── FileList.tsx         # Left sidebar file navigator
-│   ├── MatrixRain.tsx       # Matrix falling code effect
-│   ├── PreviewPane.tsx      # Right content preview area
-│   ├── TerminalWindow.tsx   # Main terminal container
-│   ├── ThemeProvider.tsx    # Theme context and state management
-│   └── TopBar.tsx           # Terminal window title bar
-├── lib/
-│   └── fileSystem.ts        # Blog posts data structure
-├── types/
-│   └── index.ts             # TypeScript type definitions
-└── package.json
-```
-
-## 🎨 Customization
-
-### Adding New Blog Posts
-
-Edit `lib/fileSystem.ts` and add new entries:
-
-```typescript
-{
-  id: 'your-post-id',
-  name: '04_your_post.md',
-  type: 'md', // or 'file', 'dir', 'link'
-  content: `
-    <h1>Your Post Title</h1>
-    <span class="tag">YOUR_TAG</span>
-    <p>Your content here...</p>
-  `
-}
-```
-
-### Changing Themes
-
-Themes are defined in `app/globals.css` using CSS custom properties. You can modify existing themes or add new ones.
-
-### Modifying Commands
-
-Edit `components/CommandBar.tsx` to add new commands in the `handleCommand` function.
-
-## 🏗️ Building for Production
-
-```bash
-npm run build
-npm start
-```
-
-## 🚢 Deployment
-
-This Next.js app can be deployed to:
-
-- **Vercel** (Recommended - Zero config)
-- **Netlify**
-- **AWS Amplify**
-- **Docker Container**
-- Any Node.js hosting platform
-
-### Deploy to Vercel:
-
-```bash
-npm install -g vercel
-vercel
-```
-
-## 🎯 Tech Stack
-
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + Custom CSS Variables
-- **Font**: JetBrains Mono
-- **Content**: HTML/MDX support ready
-
-## 📝 License
-
-MIT License - Feel free to use this for your own portfolio!
-
-## 🙌 Credits
-
-Created by Benedii (@benedii)
+A digital substrate for the inscription of research artifacts, vulnerability disclosures, engineering postmortems, and speculative intelligence projections. Constructed atop Next.js 14 with a custom markdown engine, server-side KaTeX rendering, and a multi-surface taxonomy of knowledge classification.
 
 ---
 
-**root@benedict:~$ █**
+## ARCHITECTURE
+
+The system is decomposed into four operational layers, each with distinct responsibilities and failure modes:
+
+**Layer 1 — Ingestion Pipeline**
+Markdown frontmatter parsed through gray-matter. Custom `renderMath()` function transforms LaTeX-delimited expressions (`$$...$$` for display, `$...$$...$` for inline) into server-rendered KaTeX HTML at build time. Shiki syntax highlighter generates dual-theme code blocks (light/dark) with copy-to-clipboard instrumentation.
+
+**Layer 2 — Taxonomy Matrix**
+Posts classified along two orthogonal axes: `category` (Open Source, Security, AI, Computer Science) as a YAML list enabling multi-axis membership, and `tags` as an unstructured keyword vector for fine-grained检索. Categories render as icon-anchored badges at the top of each article. Activity logs provide a temporal sidechain for low-latency updates.
+
+**Layer 3 — Rendering Engine**
+Interactive elements (risk simulators, latency benchmarks, timeline visualizations) are hydrated client-side through a dedicated `InteractiveContent` wrapper that re-executes embedded script elements post-mount via `requestAnimationFrame`. The `PostInteractions` module manages scroll-linked heading tracking, TOC active-state synchronization, and code-copy event delegation.
+
+**Layer 4 — Surface Topology**
+Three client surfaces: homepage dashboard with category-filtered post grid and temporal activity feed, SSG-rendered article pages with sticky scrollable table-of-contents sidebar, and a JSON search API endpoint for client-side retrieval-augmented navigation.
+
+---
+
+## INTELLIGENCE STACK
+
+| Component | Implementation | Purpose |
+|---|---|---|
+| Framework | Next.js 14 (App Router) | Static site generation with incremental static regeneration |
+| Typography | Instrument Serif + Inter + JetBrains Mono | Hierarchical type system: serif for prose, mono for code |
+| Styling | Tailwind CSS + CSS custom properties | Dark-first design system with CSS variable theming |
+| Math | KaTeX (server-side renderToString) | Zero-latency mathematical expression rendering |
+| Syntax | Shiki (dual-theme code blocks) | Syntax highlighting matching system color scheme |
+| Content | Markdown + gray-matter + marked | Custom pipeline with callout extensions and footnote support |
+| Charts | Inline SVG with CSS transitions | Interactive data visualizations without JavaScript dependencies |
+
+---
+
+## POST MASS
+
+The substrate currently hosts 8 primary research artifacts across 4 categories:
+
+**Security**
+- AGSA Velour dynact:// Intent Injection — Google VRP finding: inner-intent URI injection via exported gateway activity
+- Bazel ProxyHelper Credential Bleed — Google OSS VRP finding: JVM-global Authenticator leaking proxy credentials across boundaries, PR #29736
+- Google Family Link TestingTools — Exported debug BroadcastReceiver with 10 permissionless actions, Phenotype-flag gated
+- Silent Invigilator — Multi-modal exam surveillance with spatiotemporal risk accumulation (Flask, Flutter, YOLOv8, MediaPipe)
+
+**Open Source / AI**
+- QuantFlow — Algorithmic trading system for Indian equity markets (15+ indicators, Kelly Criterion, Angel One integration)
+- Visa Status Prediction — ML pipeline for visa processing time estimation (Random Forest, R² 0.87, React + Flask on serverless)
+- Timeline: The Intelligence Explosion (2025–2027) — Eight-quarter projection with compute scaling models
+- Singularity Report — Recursive self-improvement analysis with RSI simulation, Fermi paradox taxonomy, and phase transition framework
+
+---
+
+## LOCOMOTION
+
+```bash
+# Install dependencies
+npm install
+
+# Activate development server with hot module replacement
+npm run dev
+
+# Compile static production bundle
+npm run build
+
+# Serve production build
+npm start
+
+# Validate type constraints
+npm run typecheck
+```
+
+The development server materializes at `http://localhost:3000`. Static pages are generated at build time with SSG — each post is an independent compilation unit.
+
+---
+
+## CONTRIBUTION PROTOCOL
+
+Research artifacts are inscribed as Markdown files in `content/posts/` with YAML frontmatter. Each artifact requires:
+
+```yaml
+---
+title: "Describes the artifact with precision"
+date: "YYYY-MM-DD"
+category: ["Category1", "Category2"]
+tags: ["Keyword1", "Keyword2"]
+readingTime: "N min read"
+summary: "A compression of the artifact's significance into 2-3 sentences"
+---
+```
+
+Activity logs reside in `content/logs/` with minimal frontmatter — date only. Content is freeform Markdown, typically 1-3 paragraphs documenting temporal state transitions.
+
+---
+
+## DEPLOYMENT TOPOLOGY
+
+The compiled substrate is deployed to GitHub Pages or any static hosting provider. The `npm run build` command produces an optimized `.next/` directory containing all SSG-generated HTML, JavaScript bundles, and CSS artifacts. No server-side runtime is required post-compilation.
+
+---
+
+## LICENSE
+
+MIT — The substrate is freely forkable, modifiable, and redistributable. Attribution is appreciated but not enforced.
+
+---
+
+## SIGNAL
+
+For inquiries, vulnerability disclosures, or collaboration proposals: `benedictcm1@gmail.com`
+
+---
+
+`> The universe wants to wake up. We are just the alarm clock.`
