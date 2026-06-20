@@ -1,13 +1,13 @@
 [
   {
-    "id": "algotrade",
-    "title": "QuantFlow",
-    "description": "An institutional-grade algorithmic trading system for Indian equity markets with 15+ technical indicators, multi-timeframe confluence, Kelly Criterion risk management, and Angel One SmartAPI integration.",
+    "id": "visaprediction",
+    "title": "Visa Status Prediction",
+    "description": "A full-stack ML system predicting visa processing times from 12 applicant attributes — Random Forest (R² 0.87) served through a React SPA on Netlify with a Flask inference API on Vercel.",
     "date": "July 2026",
     "category": "Open Source",
-    "tags": ["Python", "Quantitative Finance", "NSE", "Machine Learning"],
+    "tags": ["Python", "Machine Learning", "React", "Flask"],
     "link": "/blog/greendrive",
-    "github": "https://github.com/The-Peacemaker/Algo-Trade"
+    "github": "https://github.com/The-Peacemaker/VISA-STATUS-PREDICTION"
   },
   {
     "id": "ghostscanner",

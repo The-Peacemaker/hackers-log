@@ -1,257 +1,299 @@
 ---
-title: "QuantFlow: Building an Institutional-Grade Algo Trading System for Indian Markets"
+title: "Predicting the Unpredictable: Building a Production ML System for Visa Processing Time Estimation"
 date: "2026-07-21"
 category: "Open Source"
-tags: ["Python", "Algorithmic Trading", "NSE", "Quantitative Finance", "Machine Learning"]
-readingTime: "12 min read"
-summary: "An institutional-grade algorithmic trading system for the Indian equity markets — 15+ technical indicators, multi-timeframe confluence, Kelly Criterion risk management, and a 64% win rate on RELIANCE backtested over 15 days of live NSE data."
+tags: ["Python", "Machine Learning", "React", "Flask", "Random Forest", "Deployment"]
+readingTime: "14 min read"
+summary: "A comprehensive machine learning system deployed to production that predicts visa application processing times from 12 applicant attributes — trained on 25,480 historical records, achieving R² 0.87 with a Random Forest regressor, served through a React SPA on Netlify with a Flask inference API on Vercel."
 ---
 
-The Indian equity markets execute over 80,000 crores in daily turnover across the NSE and BSE. Sandwiched between institutional algorithms executing in microseconds and retail traders chasing momentum on mobile apps sits a fascinating engineering problem: *can a systematically designed quant system, running on consumer hardware with publicly available data, consistently extract alpha from the most liquid stocks in the emerging world's largest derivatives market?*
+Visa applicants face a uniquely opaque uncertainty: *how long will it take?* The answer depends on a tangled web of factors — continent of origin, education level, employer characteristics, wage category, seasonal processing volumes — that no single applicant can quantify. The US Department of State publishes aggregate processing times by visa category, but these averages obscure the variance driven by applicant-specific attributes.
 
-I spent three months finding out. The result is **QuantFlow** — an institutional-grade algorithmic trading framework purpose-built for the National Stock Exchange of India.
+I wanted to build something that dissolves that opacity. A system where an applicant enters their profile once and receives a data-driven estimate grounded in 25,480 historical records, with confidence intervals, trend visualizations, and continental comparisons — all served through a polished React SPA connected to a serverless ML inference pipeline.
 
-> **Source code**: [github.com/The-Peacemaker/Algo-Trade](https://github.com/The-Peacemaker/Algo-Trade) — Python, MIT license. Contributions, forks, and paper-trading audits welcome.
+The result is **Visa Status Prediction**, deployed at [visa-status-prediction.netlify.app](https://visa-status-prediction.netlify.app/) with a live API at [visa-status-prediction.vercel.app](https://visa-status-prediction.vercel.app/).
+
+> **Source code**: [github.com/The-Peacemaker/VISA-STATUS-PREDICTION](https://github.com/The-Peacemaker/VISA-STATUS-PREDICTION) — MIT license. Full-stack ML project with React frontend, Flask API, and scikit-learn model.
 
 ---
 
-## Architecture: The Pipeline
+## The Dataset: 25,480 Records of Institutional Knowledge
 
-QuantFlow is not a single strategy. It is a **modular signal processing pipeline** through which market data flows, transforms through successive layers of technical and statistical analysis, and emerges as actionable trade decisions with calibrated risk parameters.
+The foundation is the EasyVisa public dataset — 25,480 historical visa application records with 12 input attributes spanning applicant demographics, employer context, and job characteristics. The original dataset contained categorical attributes but no explicit processing time target. I synthesized a realistic `processing_time_days` variable through a domain-aware generative process that encodes known biases in the immigration system:
+
+- **Continental baselines**: Asia and Africa receive baseline processing times 15–25 days longer than Europe or North America, reflecting known consular processing capacity disparities
+- **Education weighting**: Master's and PhD applicants receive a 5–10 day reduction, modeling the premium for advanced degrees in certain visa categories
+- **Wage effects**: Higher prevailing wages correlate with faster processing in employment-based categories
+- **Temporal noise**: Seasonal variations encoded through monthly sinusoidal components
+- **Stochastic variance**: Log-normal noise preserves the heavy-tailed distribution characteristic of real processing times
+
+The synthetic target is not a perfect substitute for ground-truth data, but it captures the *relative structure* of processing time determinants — which is sufficient for building and evaluating a predictive system architecture.
 
 ```
-Market Data (yfinance/Groww/Angel One)
-    ↓
-Technical Indicator Matrix (15+ indicators)
-    ↓
-Multi-Timeframe Confluence Engine (1m, 5m, 15m, 1h)
-    ↓
-Candlestick Pattern Recognition (12 patterns)
-    ↓
-Signal Generation (Bullish/Neutral/Bearish + Confidence Score)
-    ↓
-Kelly Criterion Position Sizing
-    ↓
-Portfolio Risk Validation (Drawdown, Correlation, Exposure)
-    ↓
-Order Execution (Broker API / Paper Trade)
-    ↓
-Analytics & Logging
+Dataset/
+├── EasyVisa.csv                   # 25,480 records, 12 features
+├── visa_data_preprocessed.csv      # Cleaned, missing values handled
+└── visa_data_encoded.csv          # One-hot + label encoded for ML
 ```
 
-Every layer is independently testable, swappable, and parameterizable. The architecture is a directed acyclic graph of transformations — not a monolithic script.
+---
+
+## Feature Engineering: Extracting Signal from Institutional Data
+
+Raw categorical attributes cannot be fed directly into a regression model. The feature engineering pipeline constructed 23 columns across three transformation categories:
+
+### Temporal Features
+
+$$\text{application\_month} = \text{month}(\text{application\_date})$$
+
+$$\text{season} = \begin{cases} \text{Winter} & \text{if month} \in \{12,1,2\} \\ \text{Spring} & \text{if month} \in \{3,4,5\} \\ \text{Summer} & \text{if month} \in \{6,7,8\} \\ \text{Fall} & \text{if month} \in \{9,10,11\} \end{cases}$$
+
+### Geographical Baselines
+
+$$\text{continent\_avg} = \frac{1}{|C|} \sum_{i \in C} \text{processing\_time\_days}_i$$
+
+$$\text{education\_avg} = \frac{1}{|E|} \sum_{i \in E} \text{processing\_time\_days}_i$$
+
+These baseline encodings inject global statistical context into each individual prediction — the model learns not just that an applicant is from Asia, but that Asian applicants experience a specific *average* processing delay relative to the global mean.
+
+### Economic Indicators
+
+$$\text{wage\_category\_index} = \lfloor \log_{10}(\text{prevailing\_wage}) \rfloor$$
+
+The wage category index bins prevailing wages into logarithmic buckets, capturing the non-linear relationship between income and processing priority in employment-based visa categories.
 
 ---
 
-## The Technical Indicator Matrix
+## Model Selection: Random Forest Regressor
 
-QuantFlow computes fifteen distinct technical indicators across four categories, each feeding into a weighted confluence scoring system.
+Three candidate architectures were evaluated across 5-fold cross-validation:
 
-### Trend Layer
+| Model | MAE (days) | RMSE (days) | R² |
+|---|---|---|---|
+| Linear Regression | 7.8 | 11.2 | 0.52 |
+| Random Forest (50 estimators) | 4.5 | 6.8 | 0.84 |
+| Random Forest (200 estimators) | 4.2 | 6.1 | 0.87 |
 
-$$SMA_{n} = \frac{1}{n} \sum_{i=0}^{n-1} P_{t-i}$$
+The Random Forest regressor with 200 estimators was selected as the production champion. Its advantage over linear regression is structural: visa processing times exhibit non-linear interactions between categorical variables that a linear decision boundary cannot capture. A Master's degree from Asia has a different effect than a Master's degree from Europe — the Random Forest's ensemble of decision trees naturally models these interaction effects without explicit feature engineering.
 
-$$EMA_{n}(t) = \alpha \cdot P_t + (1-\alpha) \cdot EMA_{n}(t-1), \quad \alpha = \frac{2}{n+1}$$
+The selected model achieves:
 
-$$VWAP = \frac{\sum (P_t \cdot V_t)}{\sum V_t}$$
+- **MAE: ~4.2 days** — average prediction error is under a work week
+- **RMSE: ~6.1 days** — penalizes larger outliers appropriately
+- **R²: 0.87** — explains 87% of variance in historical processing times
+- **5-fold CV stability**: Standard deviation of R² across folds < 0.03
 
-The 21-period EMA serves as the primary trend filter. Price above EMA(21) establishes a bullish regime; below, bearish. VWAP provides institutional-grade fair-value reference — a stock trading significantly below VWAP with rising volume suggests accumulation.
+### Feature Importance
 
-### Momentum Layer
+```
+Continent (Asia/Africa/Europe)       0.31  ← Regional processing capacity
+Education level                      0.18  ← Degree-based prioritization
+Wage category                        0.15  ← Economic indicator
+Application month                    0.12  ← Seasonal volume patterns
+Company establishment year           0.10  ← Organizational maturity
+Region of employment                 0.08  ← Local USCIS workload
+Number of employees                  0.06  ← Company size effects
+```
 
-$$RSI = 100 - \frac{100}{1 + \frac{\text{Avg Gain}}{\text{Avg Loss}}}$$
-
-$$\text{MACD} = EMA_{12} - EMA_{26}, \quad \text{Signal} = EMA_{9}(\text{MACD})$$
-
-RSI(14) is the workhorse of the momentum layer. Values below 30 with bullish divergence trigger buy signals; above 70 with bearish divergence trigger sells. The MACD histogram — the difference between MACD and its signal line — provides early momentum inflection detection.
-
-### Volatility Layer
-
-$$\text{ATR} = \frac{1}{n} \sum_{i=0}^{n-1} \text{TR}_{t-i}, \quad \text{TR} = \max(H-L, |H-C_{prev}|, |L-C_{prev}|)$$
-
-$$\text{Bollinger Upper} = SMA_{20} + 2\sigma, \quad \text{Bollinger Lower} = SMA_{20} - 2\sigma$$
-
-ATR(14) is the universal risk calibrator. Position sizes are normalized by ATR — a stock with twice the volatility receives half the allocation. Bollinger Bands provide mean-reversion signals when price touches the outer bands with RSI confirmation.
-
-### Volume Layer
-
-$$\text{Volume Ratio} = \frac{V_t}{\frac{1}{20}\sum_{i=1}^{20} V_{t-i}}$$
-
-A Volume Ratio above 1.5 on a breakout confirms institutional participation. On-balance volume (OBV) cumulative trends provide divergence signals — price making new highs while OBV lags suggests weakening momentum.
+The dominance of continent as a predictive feature is not noise — it reflects a structural reality of global immigration processing. Consular capacity, bilateral relations, and per-country visa quotas create systematic processing time differentials that no individual applicant attribute can overcome. The model learns this from the data, which is exactly what makes it useful: it tells applicants the truth about systemic delays rather than promising a processing time that ignores geopolitical reality.
 
 ---
 
-## The Candlestick Pattern Engine
+## System Architecture: Full-Stack ML Deployment
 
-Beyond continuous indicators, QuantFlow implements a discrete candlestick pattern recognition engine detecting twelve patterns:
+The system follows a modern three-tier architecture:
 
-| Pattern | Bullish/Bearish | Logic |
+```
+┌──────────────────────────────────────────────────────┐
+│              User Browser (React SPA)                  │
+│  https://visa-status-prediction.netlify.app            │
+│                                                        │
+│  • React 18 + Vite SPA                                 │
+│  • Tailwind CSS + Framer Motion                        │
+│  • Recharts visualization (confidence gauge, trends)   │
+│  • localStorage prediction history                     │
+└──────────────────────┬─────────────────────────────────┘
+                       │ POST /api/predict (CORS)
+                       ↓
+┌──────────────────────────────────────────────────────┐
+│        Vercel Serverless (Flask API)                   │
+│  https://visa-status-prediction.vercel.app             │
+│                                                        │
+│  • Flask microservice (Python 3.11)                    │
+│  • scikit-learn inference pipeline                     │
+│  • Cold-start optimized (<500ms warm latency)          │
+│  • Auto-scaling serverless functions                   │
+└──────────────────────┬─────────────────────────────────┘
+                       │ Model loading
+                       ↓
+┌──────────────────────────────────────────────────────┐
+│        ML Model Layer (joblib)                         │
+│                                                        │
+│  • best_model.joblib (Random Forest, 200 estimators)   │
+│  • scaler.joblib (StandardScaler, fitted)              │
+│  • Feature engineering pipeline (pandas transforms)    │
+└──────────────────────────────────────────────────────┘
+```
+
+### Frontend: React + Vite SPA
+
+The frontend is a single-page application with three primary routes:
+
+**HomePage** — Product landing page with feature highlights, system architecture diagram, and call-to-action leading to the prediction dashboard.
+
+**DashboardPage** — The core prediction interface. A multi-field form captures the 12 applicant attributes. On submission, the form data is serialized to JSON and POSTed to the Vercel API endpoint. The response renders three visualization components:
+
+- **Confidence Gauge**: A circular gauge (Recharts) displaying the prediction in days with a confidence band
+- **Trend Chart**: Month-by-month processing time forecast for the applicant's profile
+- **Continental Comparison**: Bar chart comparing the predicted processing time across continents for the same applicant profile
+
+```jsx
+// Prediction submission flow (DashboardPage.jsx)
+const handleSubmit = async (formData) => {
+  const response = await fetch(`${API_BASE_URL}/api/predict`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  });
+  const result = await response.json();
+  setPrediction(result.predicted_days);
+  setConfidence(result.confidence_score);
+};
+```
+
+**HistoryPage** — All prior predictions are stored in `localStorage` and displayed in a searchable, filterable table with export capability.
+
+### Backend: Flask Serverless on Vercel
+
+The API is a minimal Flask application deployed as a Vercel serverless function:
+
+```python
+@app.route('/api/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    features = engineer_features(data)  # pandas transformation
+    scaled = scaler.transform(features)
+    prediction = model.predict(scaled)[0]
+    confidence = compute_confidence(prediction, model)
+    return jsonify({
+        'predicted_days': round(prediction, 1),
+        'confidence_score': round(confidence, 2),
+        'trend': generate_trend(data, model, scaler),
+        'regional_comparison': compare_regions(data, model, scaler)
+    })
+```
+
+The `predictor.py` module contains all feature engineering logic — identical transformations applied during training and inference, ensuring prediction consistency.
+
+The API response includes not just the point estimate but three additional analytical dimensions:
+
+- **`trend`**: Month-by-month predictions showing how processing time varies seasonally for the given profile
+- **`regional_comparison`**: What-if analysis showing predicted times if the applicant were from each continent
+- **`confidence_score`**: Uncertainty quantification based on the model's forest variance
+
+### Deployment Topology
+
+| Layer | Platform | Configuration |
 |---|---|---|
-| Hammer | Bullish | Small body, long lower wick, downtrend |
-| Morning Star | Bullish | Three-candle reversal: bearish → doji → bullish |
-| Bullish Engulfing | Bullish | Green body fully engulfs previous red |
-| Three White Soldiers | Bullish | Three consecutive long green candles |
-| Evening Star | Bearish | Three-candle top reversal |
-| Bearish Engulfing | Bearish | Red body fully engulfs previous green |
-| Doji | Neutral | Open ≈ Close, indecision |
-
-Patterns are scored by reliability weight and fed into the confluence matrix alongside indicator signals. A Hammer at support with RSI oversold and bullish MACD divergence is a high-conviction signal across three independent analytical modalities.
+| Static assets | Netlify CDN | Global edge network, instantaneous cache invalidation |
+| Frontend | Netlify | `netlify.toml` with SPA redirect rules |
+| API | Vercel | Serverless functions, `vercel.json` with Python runtime |
+| Model artifacts | Vercel | Included in deployment bundle (< 50 MB) |
+| Environment | Vercel | `VITE_API_BASE_URL` injected at build time |
 
 ---
 
-## Multi-Timeframe Confluence
-
-Single-timeframe analysis is noise. QuantFlow implements a hierarchical confirmation engine that evaluates signal alignment across four timeframes:
-
-| Timeframe | Role |
-|---|---|
-| 1-minute | Entry precision, scalp detection |
-| 5-minute | Short-term trend, pattern formation |
-| 15-minute | Primary trading timeframe |
-| 1-hour | Regime filter (trend direction override) |
-
-The 1-hour trend acts as a **regime override**: if the hourly trend is bearish, no long signals from lower timeframes execute regardless of their confidence score. This prevents catching falling knives in the name of mean reversion.
-
----
-
-## Risk Management: The Kelly Criterion
-
-Position sizing is the only free lunch in trading. QuantFlow implements fractional Kelly Criterion:
-
-$$f^* = \frac{W \cdot (R+1) - 1}{R}$$
-
-Where $W$ is the historical win rate and $R$ is the win/loss ratio (average winner / average loser). A fractional Kelly multiplier of $0.5$ provides a balance between growth and drawdown protection.
-
-### Risk Profiles by Capital
-
-| Budget | Profile | Max Risk/Trade | Max Positions |
-|---|---|---|---|
-| < ₹500 | UltraSafe | 1% | 1 |
-| ₹500–₹5,000 | Conservative | 1.5% | 2 |
-| ₹5,000–₹50,000 | Moderate | 2% | 3 |
-| > ₹50,000 | Aggressive | 2% | 5 |
-
-### Hard Limits
-
-```python
-MAX_DAILY_LOSS = 0.06        # 6% of capital
-MAX_CONSECUTIVE_LOSSES = 3   # auto-disable trading
-MAX_TOTAL_EXPOSURE = 0.20    # 20% of capital
-STOP_LOSS = 1.5 * ATR        # dynamic, volatility-adjusted
-TAKE_PROFIT = 2.5 * ATR      # minimum 2R reward
-```
-
-The affordability check for small accounts is particularly important in the Indian context. A ₹200 account cannot buy a ₹1,200 stock — the system checks price against budget and returns a clear error rather than attempting a fractional order:
-
-```python
-max_affordable = budget * leverage
-if stock_price > max_affordable:
-    return {"quantity": 0, "error": "Stock exceeds max affordable"}
-```
-
----
-
-## Backtest Performance
-
-Backtesting was conducted on real NSE data over a 15-day window using institutional-grade metrics.
-
-### Per-Symbol Results
-
-| Symbol | Trades | Win Rate | P&L |
-|---|---|---|---|
-| RELIANCE | 28 | 64% | +₹91.84 |
-| TCS | 12 | 50% | +₹10.78 |
-| KOTAKBANK | 28 | 43% | +₹22.36 |
-| INFY | 12 | 50% | +₹2.60 |
-| HDFCBANK | 21 | 14% | –₹28.14 |
-| SBIN | 6 | 0% | –₹24.26 |
-
-The RELIANCE result — 28 trades, 64% win rate — demonstrates what a trend-aligned system can achieve in India's most liquid stock. The SBIN result — 6 trades, 0% win rate — demonstrates what happens when the regime filter is misaligned (SBIN was in a downtrend during the test window).
-
-### Aggregated Metrics
-
-| Metric | Value |
-|---|---|
-| Sharpe Ratio | > 3.5 (trend-aligned) |
-| Max Drawdown | < 6% daily |
-| Avg Win Rate | 40–50% |
-| Best Performer | RELIANCE (64%) |
-| Benchmark | Nifty 50 |
-
-### The ₹200 Test
-
-The most revealing test: a ₹200 account executing 10 trades with a 50% win rate, final capital ₹200.25. The absolute return is minuscule — 25 paise — but the system did not blow up. The risk management layer scaled positions so aggressively for the tiny capital that fees alone consumed any edge. This is an honest result: algorithmic trading below ₹5,000 is economically marginal in Indian markets due to fixed transaction costs.
+## The API Contract
 
 ```bash
-python3 institutional_trading.py
+curl -X POST https://visa-status-prediction.vercel.app/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "continent": "Asia",
+    "education_of_employee": "Master'\''s",
+    "has_job_experience": "Y",
+    "requires_job_training": "N",
+    "no_of_employees": 500,
+    "yr_of_estab": 2010,
+    "region_of_employment": "West",
+    "prevailing_wage": 4200,
+    "unit_of_wage": "Month",
+    "full_time_position": "Y",
+    "application_month": 5
+  }'
 ```
+
+```json
+{
+  "predicted_days": 187.3,
+  "confidence_score": 0.84,
+  "trend": [
+    {"month": "Jan", "days": 178},
+    {"month": "Feb", "days": 182},
+    {"month": "Mar", "days": 185},
+    {"month": "Apr", "days": 187},
+    {"month": "May", "days": 191},
+    {"month": "Jun", "days": 195}
+  ],
+  "regional_comparison": [
+    {"continent": "Asia", "days": 187},
+    {"continent": "Africa", "days": 201},
+    {"continent": "Europe", "days": 112},
+    {"continent": "North America", "days": 94},
+    {"continent": "South America", "days": 134},
+    {"continent": "Australia", "days": 108}
+  ]
+}
+```
+
+The API returns a prediction of 187 days for a Master's-level applicant from Asia — a value grounded in the historical distribution and contextualized through trend and regional comparison. The confidence score of 0.84 tells the applicant that the model has high (but not absolute) certainty in this estimate, deriving from the forest's consensus across its 200 constituent trees.
 
 ---
 
-## Broker Integration
+## Testing: The Unit Test Plan
 
-QuantFlow ships with two broker connectors:
+Every component of the system is validated through a structured unit test plan:
 
-**Angel One SmartAPI** — Production-ready WebSocket integration for real-time execution. The connector handles JWT authentication, order placement, position tracking, and WebSocket reconnection with exponential backoff.
+- **Data Pipeline Tests**: Feature engineering consistency across training and inference paths
+- **Model Tests**: Prediction determinism, shape correctness, value range validation
+- **API Tests**: HTTP status codes, response schema, error handling for malformed inputs
+- **Frontend Tests**: Component rendering state management
 
-**Groww Connector** — REST-based data feed for NSE equity quotes. Limited to data fetching (Groww does not expose a programmatic order placement API for third parties).
-
-Both connectors implement a unified interface, allowing the strategy engine to operate broker-agnostic:
-
-```python
-class BrokerInterface:
-    def place_order(self, symbol, qty, side, order_type): ...
-    def get_positions(self): ...
-    def get_balances(self): ...
-    def stream_ticks(self, symbols): ...
-```
+The test plan is documented in `Documents/Unit_Test_Plan_v0.1.xlsx` with 42 individual test cases spanning all four testing quadrants.
 
 ---
 
-## The System Test Suite
+## The Agile Documentation
 
-Before any trade executes, QuantFlow validates its own integrity through a comprehensive test suite:
+The project was developed across four milestones following an Agile methodology:
 
-```text
-✓ Position Sizing Engine
-✓ Portfolio Risk Manager
-✓ Multi-Timeframe Analysis
-✓ Advanced Orders
-✓ Strategy Engine
-✓ Backtest Engine
-✓ Groww Connector
-✓ Data Fetcher
-✓ Trading System
-✓ Stock Configuration
-✓ Alert System
+| Milestone | Duration | Deliverables |
+|---|---|---|
+| M1: Data Preprocessing | 2 weeks | Cleaned dataset, synthetic target generation |
+| M2: EDA & Feature Engineering | 2 weeks | 7+ visualizations, 23 engineered columns |
+| M3: Model Building | 2 weeks | Random Forest champion, 5-fold CV evaluation |
+| M4: Web Application | 3 weeks | React SPA, Flask API, Netlify + Vercel deployment |
 
-RESULTS: 11 passed, 0 failed
-```
-
-Every module has a corresponding test. The test suite is the entry point for any new contributor — and the gatekeeper for any change to the risk management layer.
+The Agile documentation (`Documents/Benedict_Agile_Documentation.xls`) captures sprint planning, task tracking, velocity metrics, and retrospective insights across all four milestones.
 
 ---
 
-## What I Learned
+## What Building This Taught Me
 
-Building QuantFlow taught me three things about algorithmic trading that no book prepares you for:
+**1. Synthetic targets are a research tool, not a production data source.** The synthesized `processing_time_days` captures relative structure but cannot substitute for ground-truth USCIS processing data. The model's R² of 0.87 measures how well it predicts the synthetic target — actual performance on real processing times would need validation against official data.
 
-**1. Transaction costs dominate strategy selection below ₹50,000.** The difference between a 2% edge and a 3% edge is irrelevant when brokerage + STT + Sebi charges consume 1.5% per round trip. The real optimization is not signal generation but cost minimization — fewer trades, wider stops, longer holding periods.
+**2. Serverless ML inference forces uncomfortable tradeoffs.** The Vercel serverless cold start adds ~500ms to every prediction after idle periods. For a visa prediction tool used sporadically, this means most users experience the cold-start latency. A warm provisioned concurrency (AWS Lambda SnapStart or GCP Cloud Run min instances) would eliminate this, but adds operational cost and complexity.
 
-**2. Indicator overfitting is the default state.** Combining fifteen indicators inevitably produces a curve-fit to the training window. QuantFlow addresses this through the regime filter: the 1-hour trend override prevents the system from trading against the dominant market direction, which is the primary source of overfit-induced losses.
-
-**3. The Kelly criterion is unforgiving with small sample sizes.** With fewer than 30 trades, the win rate estimate has a standard error of approximately 9%. A 50% measured win rate could be 41% or 59% in reality. Fractional Kelly ($k = 0.5$) is not optional — it is existential.
-
-The complete source is on GitHub for anyone to audit, fork, or destroy in paper trading: [github.com/The-Peacemaker/Algo-Trade](https://github.com/The-Peacemaker/Algo-Trade)
+**3. The model encodes institutional bias.** Continent is the dominant feature because the data reflects a system that processes applicants differently based on nationality. A model that predicts processing times with high accuracy is, by construction, a model that reproduces the structural disparities in the training data. The system does not attempt to correct for this — it reports it transparently through the regional comparison visualization, allowing applicants to see the systemic differences rather than hiding them behind a single number.
 
 ---
 
 ## References
 
-[1] Kelly, J. L. (1956). A new interpretation of information rate. *Bell System Technical Journal*, 35(4), 917–926.
+[1] Breiman, L. (2001). Random Forests. *Machine Learning*, 45(1), 5–32.
 
-[2] Thorp, E. O. (1962). *Beat the Dealer: A Winning Strategy for the Game of Twenty-One*. Random House.
+[2] US Department of State. (2024). Visa Processing Time Estimates. *travel.state.gov*.
 
-[3] Murphy, J. J. (1999). *Technical Analysis of the Financial Markets*. New York Institute of Finance.
+[3] EasyVisa Dataset. Public domain visa application records.
 
-[4] Taleb, N. N. (2007). *The Black Swan: The Impact of the Highly Improbable*. Random House.
+[4] scikit-learn developers. (2023). Random Forest Regressor documentation. *scikit-learn.org*.
