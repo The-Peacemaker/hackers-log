@@ -36,5 +36,15 @@
     "category": "Computer Science",
     "tags": ["TypeScript", "Hardware Simulation", "Compiler"],
     "github": "https://github.com/benedii/minicpu"
+  },
+  {
+    "id": "sentinelmesh",
+    "title": "SentinelMesh Platform",
+    "description": "Autonomous infrastructure monitoring fabric ingesting telemetry over Kafka, detecting anomalies with Isolation Forest ML, correlating incidents across a sliding window, and executing simulated self-healing workflows — all served through a real-time SSE dashboard.",
+    "date": "July 2026",
+    "category": "Open Source",
+    "tags": ["Distributed Systems", "Kafka", "gRPC", "Machine Learning", "DevOps"],
+    "link": "/blog/sentinelmesh",
+    "github": "https://github.com/The-Peacemaker/sentinel-mesh-platform"
   }
 ]
