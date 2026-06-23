@@ -222,7 +222,7 @@ with open("isolation_forest.pkl", "wb") as f:
 
 The five-dimensional feature vector encodes the fundamental signals of infrastructure health:
 
-$$\mathbf{x} = [\text{CPU%}, \text{RAM%}, \text{ResponseTime}_{\text{ms}}, \text{NetworkPkts/s}, \text{FailedLogins}]$$
+$$\mathbf{x} = [\text{CPU}\%, \text{RAM}\%, \text{ResponseTime}_{\text{ms}}, \text{NetworkPkts/s}, \text{FailedLogins}]$$
 
 The Isolation Forest algorithm builds an ensemble of random binary trees. The anomaly score for a point $x$ is derived from the average path length through the forest:
 
